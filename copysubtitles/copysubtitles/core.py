@@ -117,11 +117,21 @@ class Core(CorePluginBase):
         return Core.get_contents(location, test=lambda x: os.path.isdir(x))
 
     @staticmethod
-    def get_video_folders(location):
-        for d in set([
-            os.path.dirname(path) for path in Core.get_contents(location, test=lambda x: TEST_VIDEO.match(x))
-        ]):
-            yield d
+    def get_root_folder(location):
+        l2 = os.path.dirname(location)
+        if not l2:
+            return location
+        return Core.get_root_folder(l2)
+
+    @staticmethod
+    def get_video_folders(location, files):
+        root_folders = set([Core.get_root_folder(f) for f in files])
+        for rf in root_folders:
+            loc = os.path.join(location, rf)
+            for d in set([
+                os.path.dirname(path) for path in Core.get_contents(loc, test=lambda x: TEST_VIDEO.match(x))
+            ]):
+                yield d
 
     def find_subtitles(self, location):
         files = os.listdir(location)
@@ -162,10 +172,7 @@ class Core(CorePluginBase):
         torrent = component.get("TorrentManager").torrents[torrent_id]
         info = torrent.get_status(["name", "save_path", "move_on_completed", "move_on_completed_path"])
         location = info["move_on_completed_path"] if info["move_on_completed"] else info["save_path"]
-        files = torrent.get_files()
-
-        log.info("COPYSUBTITLES: work paths: %s, %s, %s" % (info["move_on_completed_path"], info["save_path"], files))
-        self.find_video(torrent_id, Core.get_video_folders(location))
+        self.find_video(torrent_id, Core.get_video_folders(location, torrent.get_files()))
 
     @staticmethod
     def _thread_copy(torrent_id, video_folder, subtitle_folder, files):
@@ -211,3 +218,9 @@ class Core(CorePluginBase):
     def get_config(self):
         "returns the config dictionary"
         return self.config.config
+
+
+[{'index': 0, 'size': 571127854, 'offset': 0, 'path': u'[HorribleSubs] Citrus [1080]/[HorribleSubs] Citrus - 03 [1080p].mkv'},
+ {'index': 1, 'size': 34669, 'offset': 571127854, 'path': u'[HorribleSubs] Citrus [1080]/Rus sub/crunchyroll/[HorribleSubs] Citrus - 02 [1080p].ass'},
+ {'index': 2, 'size': 34798, 'offset': 571162523, 'path': u'[HorribleSubs] Citrus [1080]/Rus sub/crunchyroll/[HorribleSubs] Citrus - 03 [1080p].ass'},
+ {'index': 3, 'size': 30407, 'offset': 571197321, 'path': u'[HorribleSubs] Citrus [1080]/Rus sub/crunchyroll/[HorribleSubs] Citrus - 04 [1080p].ass'}, {'index': 4, 'size': 35931, 'offset': 571227728, 'path': u'[HorribleSubs] Citrus [1080]/Rus sub/crunchyroll/[HorribleSubs] Citrus - 05 [1080p].ass'}, {'index': 5, 'size': 30231, 'offset': 571263659, 'path': u'[HorribleSubs] Citrus [1080]/Rus sub/crunchyroll/[HorribleSubs] Citrus - 06 [1080p].ass'}, {'index': 6, 'size': 35980, 'offset': 571293890, 'path': u'[HorribleSubs] Citrus [1080]/Rus sub/crunchyroll/[HorribleSubs] Citrus - 07 [1080p].ass'}, {'index': 7, 'size': 32297, 'offset': 571329870, 'path': u'[HorribleSubs] Citrus [1080]/Rus sub/crunchyroll/[HorribleSubs] Citrus - 08 [1080p].ass'}, {'index': 8, 'size': 568501044, 'offset': 571362167, 'path': u'[HorribleSubs] Citrus [1080]/[HorribleSubs] Citrus - 01 [1080p].mkv'}, {'index': 9, 'size': 568513233, 'offset': 1139863211, 'path': u'[HorribleSubs] Citrus [1080]/[HorribleSubs] Citrus - 02 [1080p].mkv'}, {'index': 10, 'size': 34141, 'offset': 1708376444, 'path': u'[HorribleSubs] Citrus [1080]/Rus sub/crunchyroll/[HorribleSubs] Citrus - 01 [1080p].ass'}, {'index': 11, 'size': 567271187, 'offset': 1708410585, 'path': u'[HorribleSubs] Citrus [1080]/[HorribleSubs] Citrus - 04 [1080p].mkv'}, {'index': 12, 'size': 568097387, 'offset': 2275681772, 'path': u'[HorribleSubs] Citrus [1080]/[HorribleSubs] Citrus - 05 [1080p].mkv'}, {'index': 13, 'size': 567448070, 'offset': 2843779159, 'path': u'[HorribleSubs] Citrus [1080]/[HorribleSubs] Citrus - 06 [1080p].mkv'}, {'index': 14, 'size': 567607660, 'offset': 3411227229, 'path': u'[HorribleSubs] Citrus [1080]/[HorribleSubs] Citrus - 07 [1080p].mkv'}, {'index': 15, 'size': 567493854, 'offset': 3978834889, 'path': u'[HorribleSubs] Citrus [1080]/[HorribleSubs] Citrus - 08 [1080p].mkv'}]
