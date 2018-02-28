@@ -125,7 +125,7 @@ class Core(CorePluginBase):
 
     @staticmethod
     def get_video_folders(location, files):
-        root_folders = set([Core.get_root_folder(f.path) for f in files])
+        root_folders = set([Core.get_root_folder(f['path']) for f in files])
         for rf in root_folders:
             if not rf:
                 continue
