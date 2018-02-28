@@ -115,33 +115,27 @@ class Core(CorePluginBase):
         f1 = len(s1)
         f2 = len(s2)
 
-        log.info("COPYSUBTITLES: start score %s " % location)
         for filename in subs[:3]:
             f_score = int(bool(re.search('\.(' + langs + ')+\.', filename.lower())))
             path = os.path.join(location, filename)
-            log.info("COPYSUBTITLES: sub load %s " % path)
             sub = pysubs2.load(path)
-            log.info("COPYSUBTITLES: sub loaded")
             coverage = len(sub)
 
             if not f_score:
                 # check language for the first 100 events
                 for line in sub[:30]:
-                    log.info("COPYSUBTITLES: guess")
                     f_score += Core.get_lang_prob(lang, line.text)
-                    log.info("COPYSUBTITLES: guessed")
             subs_lang.append(lang if f_score > .7 else None)
             score += f_score / float(min(coverage, 100))
             density += (coverage / float(sub[-1].end)) / DENS
 
-        log.info("COPYSUBTITLES: end score %s " % location)
         lng_score = score / fs
         cnt_score = int(fs >= count)
         dns_score = density / fs
         ssa_score = f1 / fs
         srt_score = f2 / fs
 
-        log.info("COPYSUBTITLES: scores for %s - %s, %s, %s, %s, %s" (location, lng_score, cnt_score, dns_score, ssa_score, srt_score))
+        log.debug("COPYSUBTITLES: scores for %s - %s, %s, %s, %s, %s" % (location, lng_score, cnt_score, dns_score, ssa_score, srt_score))
         return -(
             lng_score * 10 ** 8 +
             cnt_score * 10 ** 7 +
