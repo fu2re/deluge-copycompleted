@@ -1,13 +1,11 @@
 deluge-copycompleted
 ====================
 
-This plugin for [Deluge][1] copies downloaded files to another location.
+This plugin for [Deluge][1] copies downloaded subtitle files next to the video it belongs.
+Based on [deluge-copycompleted][2]
 
-It can only be configured via the web interface (or by hand); there is no GTK
+It can only be configured via config files; there is no any
 UI for this plugin.
 
-It works fine for me, but if there are any issues, feel free to drop me an
-email at sam@edgylogic.com, or better yet, fork, fix, and I'll pull your
-changes.
-
   [1]: http://deluge-torrent.org
+  [2]: https://github.com/slai/deluge-copycompleted

@@ -1,0 +1,13 @@
+setup.py
+copysubtitles/__init__.py
+copysubtitles/common.py
+copysubtitles/core.py
+copysubtitles/gtkui.py
+copysubtitles/webui.py
+copysubtitles.egg-info/PKG-INFO
+copysubtitles.egg-info/SOURCES.txt
+copysubtitles.egg-info/dependency_links.txt
+copysubtitles.egg-info/entry_points.txt
+copysubtitles.egg-info/top_level.txt
+copysubtitles/data/config.glade
+copysubtitles/data/copysubtitles.js

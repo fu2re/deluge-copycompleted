@@ -1,0 +1,8 @@
+
+    [deluge.plugin.core]
+    copysubtitles = copysubtitles:CorePlugin
+    [deluge.plugin.gtkui]
+    copysubtitles = copysubtitles:GtkUIPlugin
+    [deluge.plugin.web]
+    copysubtitles = copysubtitles:WebUIPlugin
+    
