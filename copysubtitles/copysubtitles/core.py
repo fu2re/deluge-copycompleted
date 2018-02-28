@@ -189,7 +189,7 @@ class Core(CorePluginBase):
                 continue
             yield score, entry, files
 
-    def find_video(self, torrent_id, video_folders):
+    def find_video(self, torrent_id, video_folders, forced=False):
         try:
             video_folder = next(video_folders)
             subtitle_folders = sorted(list(self.find_subtitles(video_folder)))
@@ -197,7 +197,7 @@ class Core(CorePluginBase):
             if subtitle_folders:
                 _score, subtitle_folder, files = subtitle_folders[0]
                 thread.start_new_thread(
-                    Core._thread_copy, (torrent_id, video_folder, subtitle_folder, files)
+                    Core._thread_copy, (torrent_id, video_folder, subtitle_folder, files, forced)
                 )
             self.find_video(torrent_id, video_folders)
         except StopIteration:
@@ -212,10 +212,12 @@ class Core(CorePluginBase):
         torrent = component.get("TorrentManager").torrents[torrent_id]
         info = torrent.get_status(["name", "save_path", "move_on_completed", "move_on_completed_path"])
         location = info["move_on_completed_path"] if info["move_on_completed"] else info["save_path"]
-        self.find_video(torrent_id, Core.get_video_folders(location, torrent.get_files()))
+        _p, rest = location.split('/')
+        forced = rest.lower() == 'anime'
+        self.find_video(torrent_id, Core.get_video_folders(location, torrent.get_files()), forced)
 
     @staticmethod
-    def _thread_copy(torrent_id, video_folder, subtitle_folder, files):
+    def _thread_copy(torrent_id, video_folder, subtitle_folder, files, forced=False):
         path_pairs = []
         for filename, lang in files:
             try:
@@ -225,8 +227,8 @@ class Core(CorePluginBase):
 
                 if lang and lang not in suffixes:
                     filename += '.' + lang
-                # if 'forced' not in suffixes:
-                #     filename += '.forced'
+                if forced and 'forced' not in suffixes:
+                    filename += '.forced'
 
                 new_file_path = os.path.join(video_folder, ''.join((filename, file_extension)))
 
