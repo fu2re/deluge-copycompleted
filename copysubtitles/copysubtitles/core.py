@@ -111,7 +111,7 @@ class Core(CorePluginBase):
         s2 = filter(TEST_SUB2.match, files)
         subs = list(set(s1) | set(s2))
         subs_lang = []
-        fs = len(subs) or .00001
+        fs = len(subs) or 10 ** -5
         f1 = len(s1)
         f2 = len(s2)
 
@@ -134,6 +134,7 @@ class Core(CorePluginBase):
             score += f_score / float(min(coverage, 100))
             density += (coverage / float(sub[-1].end)) / DENS
 
+        log.info("COPYSUBTITLES: end score %s " % location)
         lng_score = score / fs
         cnt_score = int(fs >= count)
         dns_score = density / fs
