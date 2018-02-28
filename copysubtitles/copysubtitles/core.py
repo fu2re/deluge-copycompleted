@@ -240,7 +240,7 @@ class Core(CorePluginBase):
                 # check that this file doesn't already exist at the new location
                 if os.path.exists(new_file_path):
                     log.info("COPYSUBTITLES: %s already exists in the destination. Skipping." % new_file_path)
-                    break
+                    continue
 
                 log.info("COPYSUBTITLES: Copying %s to %s" % (old_file_path, new_file_path))
 
