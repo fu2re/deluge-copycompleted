@@ -127,6 +127,8 @@ class Core(CorePluginBase):
     def get_video_folders(location, files):
         root_folders = set([Core.get_root_folder(f) for f in files])
         for rf in root_folders:
+            if not rf:
+                continue
             loc = os.path.join(location, rf)
             for d in set([
                 os.path.dirname(path) for path in Core.get_contents(loc, test=lambda x: TEST_VIDEO.match(x))
