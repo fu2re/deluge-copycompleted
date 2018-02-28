@@ -103,6 +103,7 @@ class Core(CorePluginBase):
 
     @staticmethod
     def score_subtitles_folder(langs, count, location):
+        log.info("COPYSUBTITLES: start score %s " % location)
         lang = langs.split('|')[0]
         score = 0
         density = 0
@@ -192,7 +193,6 @@ class Core(CorePluginBase):
     def find_video(self, torrent_id, video_folders):
         try:
             video_folder = next(video_folders)
-            self.find_subtitles(video_folder)
             subtitle_folders = sorted(list(self.find_subtitles(video_folder)))
 
             if subtitle_folders:
