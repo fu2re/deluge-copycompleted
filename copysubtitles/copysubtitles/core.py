@@ -115,7 +115,7 @@ class Core(CorePluginBase):
         f1 = len(s1)
         f2 = len(s2)
 
-        for filename in subs[:5]:
+        for filename in subs[:3]:
             f_score = int(bool(re.search('\.(' + langs + ')+\.', filename.lower())))
             path = os.path.join(location, filename)
             sub = pysubs2.load(path)
@@ -123,7 +123,7 @@ class Core(CorePluginBase):
 
             if not f_score:
                 # check language for the first 100 events
-                for line in sub[:100]:
+                for line in sub[:30]:
                     f_score += Core.get_lang_prob(lang, line.text)
             subs_lang.append(lang if f_score > .7 else None)
             score += f_score / float(min(coverage, 100))
