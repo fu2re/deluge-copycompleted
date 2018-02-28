@@ -212,12 +212,12 @@ class Core(CorePluginBase):
         torrent = component.get("TorrentManager").torrents[torrent_id]
         info = torrent.get_status(["name", "save_path", "move_on_completed", "move_on_completed_path"])
         location = info["move_on_completed_path"] if info["move_on_completed"] else info["save_path"]
-        _p, rest = location.split('/')
+        _p, rest = os.path.split(location)
         forced = rest.lower() == 'anime'
         self.find_video(torrent_id, Core.get_video_folders(location, torrent.get_files()), forced)
 
     @staticmethod
-    def _thread_copy(torrent_id, video_folder, subtitle_folder, files, forced=False):
+    def _thread_copy(torrent_id, video_folder, subtitle_folder, files, forced):
         path_pairs = []
         for filename, lang in files:
             try:
