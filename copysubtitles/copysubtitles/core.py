@@ -162,6 +162,9 @@ class Core(CorePluginBase):
         torrent = component.get("TorrentManager").torrents[torrent_id]
         info = torrent.get_status(["name", "save_path", "move_on_completed", "move_on_completed_path"])
         location = info["move_on_completed_path"] if info["move_on_completed"] else info["save_path"]
+        files = torrent.get_files()
+
+        log.info("COPYSUBTITLES: work paths: %s, %s, %s" % (info["move_on_completed_path"], info["save_path"], files))
         self.find_video(torrent_id, Core.get_video_folders(location))
 
     @staticmethod
