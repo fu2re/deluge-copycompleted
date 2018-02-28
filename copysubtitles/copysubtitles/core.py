@@ -125,7 +125,7 @@ class Core(CorePluginBase):
 
     @staticmethod
     def get_video_folders(location, files):
-        root_folders = set([Core.get_root_folder(f) for f in files])
+        root_folders = set([Core.get_root_folder(f.path) for f in files])
         for rf in root_folders:
             if not rf:
                 continue
@@ -220,9 +220,3 @@ class Core(CorePluginBase):
     def get_config(self):
         "returns the config dictionary"
         return self.config.config
-
-
-[{'index': 0, 'size': 571127854, 'offset': 0, 'path': u'[HorribleSubs] Citrus [1080]/[HorribleSubs] Citrus - 03 [1080p].mkv'},
- {'index': 1, 'size': 34669, 'offset': 571127854, 'path': u'[HorribleSubs] Citrus [1080]/Rus sub/crunchyroll/[HorribleSubs] Citrus - 02 [1080p].ass'},
- {'index': 2, 'size': 34798, 'offset': 571162523, 'path': u'[HorribleSubs] Citrus [1080]/Rus sub/crunchyroll/[HorribleSubs] Citrus - 03 [1080p].ass'},
- {'index': 3, 'size': 30407, 'offset': 571197321, 'path': u'[HorribleSubs] Citrus [1080]/Rus sub/crunchyroll/[HorribleSubs] Citrus - 04 [1080p].ass'}, {'index': 4, 'size': 35931, 'offset': 571227728, 'path': u'[HorribleSubs] Citrus [1080]/Rus sub/crunchyroll/[HorribleSubs] Citrus - 05 [1080p].ass'}, {'index': 5, 'size': 30231, 'offset': 571263659, 'path': u'[HorribleSubs] Citrus [1080]/Rus sub/crunchyroll/[HorribleSubs] Citrus - 06 [1080p].ass'}, {'index': 6, 'size': 35980, 'offset': 571293890, 'path': u'[HorribleSubs] Citrus [1080]/Rus sub/crunchyroll/[HorribleSubs] Citrus - 07 [1080p].ass'}, {'index': 7, 'size': 32297, 'offset': 571329870, 'path': u'[HorribleSubs] Citrus [1080]/Rus sub/crunchyroll/[HorribleSubs] Citrus - 08 [1080p].ass'}, {'index': 8, 'size': 568501044, 'offset': 571362167, 'path': u'[HorribleSubs] Citrus [1080]/[HorribleSubs] Citrus - 01 [1080p].mkv'}, {'index': 9, 'size': 568513233, 'offset': 1139863211, 'path': u'[HorribleSubs] Citrus [1080]/[HorribleSubs] Citrus - 02 [1080p].mkv'}, {'index': 10, 'size': 34141, 'offset': 1708376444, 'path': u'[HorribleSubs] Citrus [1080]/Rus sub/crunchyroll/[HorribleSubs] Citrus - 01 [1080p].ass'}, {'index': 11, 'size': 567271187, 'offset': 1708410585, 'path': u'[HorribleSubs] Citrus [1080]/[HorribleSubs] Citrus - 04 [1080p].mkv'}, {'index': 12, 'size': 568097387, 'offset': 2275681772, 'path': u'[HorribleSubs] Citrus [1080]/[HorribleSubs] Citrus - 05 [1080p].mkv'}, {'index': 13, 'size': 567448070, 'offset': 2843779159, 'path': u'[HorribleSubs] Citrus [1080]/[HorribleSubs] Citrus - 06 [1080p].mkv'}, {'index': 14, 'size': 567607660, 'offset': 3411227229, 'path': u'[HorribleSubs] Citrus [1080]/[HorribleSubs] Citrus - 07 [1080p].mkv'}, {'index': 15, 'size': 567493854, 'offset': 3978834889, 'path': u'[HorribleSubs] Citrus [1080]/[HorribleSubs] Citrus - 08 [1080p].mkv'}]
