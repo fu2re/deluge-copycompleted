@@ -117,11 +117,23 @@ class Core(CorePluginBase):
         return Core.get_contents(location, test=lambda x: os.path.isdir(x))
 
     @staticmethod
-    def get_video_folders(location):
-        for d in set([
-            os.path.dirname(path) for path in Core.get_contents(location, test=lambda x: TEST_VIDEO.match(x))
-        ]):
-            yield d
+    def get_root_folder(location):
+        l2 = os.path.dirname(location)
+        if not l2:
+            return location
+        return Core.get_root_folder(l2)
+
+    @staticmethod
+    def get_video_folders(location, files):
+        root_folders = set([Core.get_root_folder(f['path']) for f in files])
+        for rf in root_folders:
+            if not rf:
+                continue
+            loc = os.path.join(location, rf)
+            for d in set([
+                os.path.dirname(path) for path in Core.get_contents(loc, test=lambda x: TEST_VIDEO.match(x))
+            ]):
+                yield d
 
     def find_subtitles(self, location):
         files = os.listdir(location)
@@ -162,7 +174,7 @@ class Core(CorePluginBase):
         torrent = component.get("TorrentManager").torrents[torrent_id]
         info = torrent.get_status(["name", "save_path", "move_on_completed", "move_on_completed_path"])
         location = info["move_on_completed_path"] if info["move_on_completed"] else info["save_path"]
-        self.find_video(torrent_id, Core.get_video_folders(location))
+        self.find_video(torrent_id, Core.get_video_folders(location, torrent.get_files()))
 
     @staticmethod
     def _thread_copy(torrent_id, video_folder, subtitle_folder, files):

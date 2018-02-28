@@ -48,10 +48,15 @@ from deluge.core.rpcserver import export
 from deluge.event import DelugeEvent
 from twisted.python.filepath import FilePath
 from twisted.internet import reactor
+from langdetect import detect_langs
+from langdetect.lang_detect_exception import LangDetectException
+import pysubs2
 
 TEST_VIDEO = re.compile('.*(' + '|'.join(['mkv', 'mp4']) + ')$')
 TEST_SUB1 = re.compile('.*(' + '|'.join(['ass', 'ssa']) + ')$')
 TEST_SUB2 = re.compile('.*(srt)$')
+# default density is 243 events for 23 min
+DENS = 243 / 1418930.
 
 
 class TorrentCopiedEvent(DelugeEvent):
@@ -72,7 +77,7 @@ class TorrentCopiedEvent(DelugeEvent):
 class Core(CorePluginBase):
     def enable(self):
         self.config = deluge.configmanager.ConfigManager("copysubtitles.conf", {
-            'lang': 'ru|rus|russian'
+            'lang': 'ru|rus'
         })
         # Get notified when a torrent finishes downloading
         component.get("EventManager").register_event_handler("TorrentFinishedEvent", self.on_torrent_finished)
@@ -88,22 +93,56 @@ class Core(CorePluginBase):
         pass
 
     @staticmethod
-    def score_subtitles_folder(lang, count, location):
+    def get_lang_prob(lang, text):
+        try:
+            for l in filter(lambda p: p.lang, detect_langs(text)):
+                return l.prob
+            return 0
+        except LangDetectException:
+            return 0
+
+    @staticmethod
+    def score_subtitles_folder(langs, count, location):
+        lang = langs.split('|')[0]
+        score = 0
+        density = 0
         files = os.listdir(location)
         s1 = filter(TEST_SUB1.match, files)
         s2 = filter(TEST_SUB2.match, files)
+        subs = list(set(s1) | set(s2))
+        subs_lang = []
+        fs = len(subs) or .00001
         f1 = len(s1)
         f2 = len(s2)
-        return - (
-            # choose folder with own language
-            int(bool(re.search('(' + lang + ')+', location.lower()))) * 1000000 +
-            # choose folder with full set of subtitles
-            int((f1 + f2) >= count) * 100000 +
-            # prefer ass/ssa
-            f1 * 2 +
-            # or at least srt
-            f2
-        ), set(s1) | set(s2)
+
+        for filename in subs[:5]:
+            f_score = int(bool(re.search('\.(' + langs + ')+\.', filename.lower())))
+            path = os.path.join(location, filename)
+            sub = pysubs2.load(path)
+            coverage = len(sub)
+
+            if not f_score:
+                # check language for the first 100 events
+                for line in sub[:100]:
+                    f_score += Core.get_lang_prob(lang, line.text)
+            subs_lang.append(lang if f_score > .7 else None)
+            score += f_score / float(min(coverage, 100))
+            density += (coverage / float(sub[-1].end)) / DENS
+
+        lng_score = score / fs
+        cnt_score = int(fs >= count)
+        dns_score = density / fs
+        ssa_score = f1 / fs
+        srt_score = f2 / fs
+
+        log.info("COPYSUBTITLES: scores for %s - %s, %s, %s, %s, %s" (location, lng_score, cnt_score, dns_score, ssa_score, srt_score))
+        return -(
+            lng_score * 10 ** 8 +
+            cnt_score * 10 ** 7 +
+            dns_score * 10 ** 4 +
+            ssa_score * 10 ** 3 +
+            srt_score
+        ), zip(subs, [lang if len(set(subs_lang)) == 1 else None] * int(len(subs)))
 
     @staticmethod
     def get_contents(location, test=None, method='walk'):
@@ -179,10 +218,18 @@ class Core(CorePluginBase):
     @staticmethod
     def _thread_copy(torrent_id, video_folder, subtitle_folder, files):
         path_pairs = []
-        for filename in files:
+        for filename, lang in files:
             try:
                 old_file_path = os.path.join(subtitle_folder, filename)
-                new_file_path = os.path.join(video_folder, filename)
+                filename, file_extension = os.path.splitext(filename)
+                suffixes = filename.lower().split('.')
+
+                if lang and lang not in suffixes:
+                    filename += '.' + lang
+                # if 'forced' not in suffixes:
+                #     filename += '.forced'
+
+                new_file_path = os.path.join(video_folder, ''.join((filename, file_extension)))
 
                 # check that this file exists at the current location
                 # if not os.path.exists(old_file_path):
@@ -191,7 +238,7 @@ class Core(CorePluginBase):
 
                 # check that this file doesn't already exist at the new location
                 if os.path.exists(new_file_path):
-                    log.info("COPYSUBTITLES: %s already exists in the destination. Skipping." % f["path"])
+                    log.info("COPYSUBTITLES: %s already exists in the destination. Skipping." % new_file_path)
                     break
 
                 log.info("COPYSUBTITLES: Copying %s to %s" % (old_file_path, new_file_path))
