@@ -58,7 +58,7 @@ TEST_SUB1 = re.compile('.*(' + '|'.join(['ass', 'ssa']) + ')$')
 TEST_SUB2 = re.compile('.*(srt)$')
 # default density is 243 events for 23 min
 DENS = 243 / 1418930.
-ACCURACY = .75
+ACCURACY = .65
 
 
 class TorrentCopiedEvent(DelugeEvent):
@@ -147,9 +147,9 @@ class Core(CorePluginBase):
         f2 = len(s2)
         # number of contested lines. Lower is better for performance.
         width = 30
-
+        sl = float(min(3, fs))
         # contest some files
-        for filename in subs[:3]:
+        for filename in subs[:int(sl)]:
             # check existed suffix. it will be equal to 0 if it does not exist
             f_score = int(bool(re.search('\.(' + languages + ')+\.', filename.lower())))
             # load subtitles and check it length
@@ -157,7 +157,6 @@ class Core(CorePluginBase):
             sub = pysubs2.load(path)
             coverage = len(sub)
             f_density = (coverage / float(sub[-1].end)) / DENS
-
             # if language score is still 0 check it more closely
             if not f_score:
                 # we should not start from begging in case of intro
@@ -166,20 +165,20 @@ class Core(CorePluginBase):
                 # check language for the selected part
                 for line in sub[start:(start+width)]:
                     f_score += Core.get_lang_prob(lang, line.text)
+            # normalize the score
+            f_score = f_score / float(min(coverage, width))
             # append language to majority vote list if it accurate enough
             subs_lang.append(lang if f_score > ACCURACY else None)
             # stack language score and density
-            score += f_score / float(min(coverage, width))
+            score += f_score
             density += f_density
-
         # get the final scores
-        lng_score = int((score / fs) > ACCURACY)
+        lng_score = int((score / sl) > ACCURACY)
         cnt_score = int(fs >= count)
-        dns_score = min(round(density / fs), 1)
+        dns_score = min(round(density / sl), 1)
         ssa_score = round(f1 / float(fs), 2)
         srt_score = round(f2 / float(fs), 2)
         majority = len(set(subs_lang)) == 1
-
         log.info("COPYSUBTITLES: scores for %s - %s, %s, %s, %s, %s" % \
                  (location, lng_score, cnt_score, dns_score, ssa_score, srt_score))
         return -(
