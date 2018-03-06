@@ -258,6 +258,7 @@ class Core(CorePluginBase):
         episodes_count = len(filter(TEST_VIDEO.match, all_files))
         subtitle_files = filter(TEST_SUB1.match, all_files) + filter(TEST_SUB2.match, all_files)
         # if subtitles already here check suffixes only
+        log.info("COPYSUBTITLES: %s of %s already presented" % (subtitle_files, episodes_count))
         if len(subtitle_files) >= episodes_count:
             yield -10 ** 10, location, subtitle_files
 
@@ -301,6 +302,7 @@ class Core(CorePluginBase):
                 continue
 
             _score, subtitle_folder, files = subtitle_folders[0]
+            log.info("COPYSUBTITLES: Matched %s with score %s" % (subtitle_folder, _score))
             thread.start_new_thread(
                 Core._thread_copy, (torrent_id, video_folder, subtitle_folder, files, forced)
             )
