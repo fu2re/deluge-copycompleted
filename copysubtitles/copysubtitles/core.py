@@ -256,11 +256,14 @@ class Core(CorePluginBase):
         """
         all_files = os.listdir(location)
         episodes_count = len(filter(TEST_VIDEO.match, all_files))
-        subtitle_files = filter(TEST_SUB1.match, all_files) + filter(TEST_SUB2.match, all_files)
+        subtitle_count = len(filter(TEST_SUB1.match, all_files) + filter(TEST_SUB2.match, all_files))
         # if subtitles already here check suffixes only
-        log.info("COPYSUBTITLES: %s of %s already presented" % (subtitle_files, episodes_count))
-        if len(subtitle_files) >= episodes_count:
-            yield -10 ** 10, location, subtitle_files
+        log.info("COPYSUBTITLES: %s of %s already presented" % (subtitle_count, episodes_count))
+        if subtitle_count >= episodes_count:
+            score, files = Core.score_subtitles_folder(
+                self.config["lang"], episodes_count, location
+            )
+            yield score, location, files
 
         else:
 
